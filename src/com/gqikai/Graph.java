@@ -1,20 +1,21 @@
 package com.gqikai;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Graph {
-    public static final String NEWLINE = System.getProperty("line.separator");
+    private static final String NEWLINE = System.getProperty("line.separator");
 
-    public int V;
-    public int E;
-    public ArrayList<Edge> edges;
-    public ArrayList<Integer>[] adj;
-    public LinkedHashMap<Edge, Integer> P4Centrality;
-    public ArrayList<ArrayList<Integer>> Quadruples;
+    public int V;//节点数量
+    private int E;//边数量
+    private ArrayList<Edge> edges;//边信息
+    public ArrayList<Integer>[] adj;//邻接表
+    private LinkedHashMap<Edge, Integer> P4Centrality;//P4中心性表
+    private ArrayList<ArrayList<Integer>> Quadruples;
 
-    public int RE = 0;
-    public Graph(File file) {
+    private int RE = 0;
+    private Graph(File file) {
         try {
 
             FileInputStream fis = new FileInputStream(file);
@@ -56,7 +57,7 @@ public class Graph {
         }
     }
 
-    public void preprocessing(File file) {
+    private void preprocessing(File file) {
 
         File test = new File("test");
         long fileLength = test.length();
@@ -80,7 +81,20 @@ public class Graph {
 
     }
 
-    public void addEdge(int v, int w) {
+    public static void writeLog(String str) {
+        try {
+            String path = "./result.txt";
+            File file = new File(path);
+            if (!file.exists())
+                file.createNewFile();
+            FileOutputStream out = new FileOutputStream(file, false); //如果追加方式用true
+            out.write(str.getBytes("utf-8"));//注意需要转换对应的字符集
+            out.close();
+        } catch (IOException ex) {
+            System.out.println(ex.getStackTrace());
+        }
+    }
+    private void addEdge(int v, int w) {
         adj[v].add(w);
         adj[w].add(v);
         Edge edge = v < w ? new Edge(v, w) : new Edge(w, v);
@@ -104,7 +118,7 @@ public class Graph {
         return s.toString();
     }
 
-    public void EPCA() {
+    private void EPCA() {
         calcP4Centrality();
         sortP4centrality();
 
@@ -131,7 +145,7 @@ public class Graph {
         System.out.println("there are " + V + " nodes and " + E + " edges.");
     }
 
-    public void removeEdge(Edge edge) {
+    private void removeEdge(Edge edge) {
         RE ++;
         System.out.println("Remove edge:" + edge + "RE:" + RE);
         P4Centrality.remove(edge);
@@ -141,7 +155,7 @@ public class Graph {
         adj[edge.vertex2].remove((Integer) edge.vertex1);
     }
 
-    public void sortP4centrality() {
+    private void sortP4centrality() {
         List<Map.Entry<Edge, Integer>> list =
                 new ArrayList<Map.Entry<Edge, Integer>>(this.P4Centrality.entrySet());
 
@@ -160,7 +174,7 @@ public class Graph {
         this.P4Centrality = sorted;
     }
 
-    public void CCN(){
+    private void CCN(){
         ArrayList traversed = new ArrayList();
         ArrayList<ArrayList> components = new ArrayList();
 
@@ -195,15 +209,21 @@ public class Graph {
             components.add(currentComponent);
         }
         System.out.println("This network contains " + components.size() + "components");
+        StringBuilder sb = new StringBuilder();
+
         for (ArrayList<Integer> component : components){
             for (Integer item : component){
                 System.out.print(item + " ");
+                sb.append(item + " ");
             }
             System.out.println();
+            sb.append("\n");
         }
+
+        writeLog(sb.toString());
     }
 
-    public void calcP4Centrality() {
+    private void calcP4Centrality() {
 
         Iterator it = this.edges.iterator();
         while (it.hasNext()) {
@@ -226,14 +246,14 @@ public class Graph {
         }
     }
 
-    public void resetP4Centrality() {
+    private void resetP4Centrality() {
         for (Edge edge : this.P4Centrality.keySet()) {
             this.P4Centrality.put(edge, 0);
         }
 
     }
 
-    public ArrayList<Edge> findEdges(ArrayList<Integer> vertices) {
+    private ArrayList<Edge> findEdges(ArrayList<Integer> vertices) {
         ArrayList<Edge> edges = new ArrayList<>();
         for (int i : vertices) {
             for (int j : vertices) {
@@ -252,7 +272,7 @@ public class Graph {
     }
 
 
-    public boolean isP4(ArrayList<Integer> elements) {
+    private boolean isP4(ArrayList<Integer> elements) {
         if (elements.size() != 4) throw new IllegalArgumentException("the number of vertex in quadruple must be 4");
 
         int[] degree = getDegree(elements);
@@ -278,7 +298,7 @@ public class Graph {
         }
     }
 
-    public int[] getDegree(ArrayList<Integer> vertices) {
+    private int[] getDegree(ArrayList<Integer> vertices) {
 
         int[] degree = new int[vertices.size()];
         for (int i = 0; i < vertices.size(); i++) {
@@ -294,7 +314,6 @@ public class Graph {
 
     public static void main(String[] args) {
         File file = new File(System.getProperty("user.dir") + "/src/com/gqikai/" + args[0]);
-
         Graph G = new Graph(file);
         G.EPCA();
         G.CCN();
