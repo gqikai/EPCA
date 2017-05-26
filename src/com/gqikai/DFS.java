@@ -2,7 +2,7 @@ package com.gqikai;
 
 import java.util.ArrayList;
 
-public class DepthFirstSearch {
+public class DFS {
     private boolean[] marked;
     private ArrayList<Integer> trace;
     private Edge edge;
@@ -10,7 +10,7 @@ public class DepthFirstSearch {
     private int depth;
     private ArrayList ret;
 
-    public DepthFirstSearch(Graph g, Edge edge) {
+    public DFS(Graph g, Edge edge) {
         this.g = g;
         this.edge = edge;
     }
