@@ -15,9 +15,9 @@ public class Graph {
 
     public int RE = 0;
 
-    public Graph(File file) {
+    public Graph(String[] args) {
         try {
-
+            File file =  OpenFile.readGraph(args);
             FileInputStream fis = new FileInputStream(file);
             Scanner in = new Scanner(new BufferedInputStream(fis));
             ArrayList<Integer> list = new ArrayList();
